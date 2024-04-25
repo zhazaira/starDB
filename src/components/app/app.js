@@ -3,50 +3,80 @@ import React, {Component} from 'react'
 import Header from '../header'
 import RandomPlanet from '../random-planet'
 
-
 import './app.css'
-import ErrorIndicator from "../error-indicator";
-import {PersonDetails, PersonList, PlanetList, StarshipList} from "../sw-components";
-import ErrorBoundary from "../error-boundary";
-import DummySwapiService from "../../services/dummy-swapi-service";
+import { ErrorIndicator, NotFoundIndicator } from "../errors"
+import ErrorBoundary from "../error-boundary"
+// import DummySwapiService from "../../services/dummy-swapi-service"
 
-import { SwapiServiceProvider } from '../swapi-service-context';
-import SwapiService from "../../services/swapi-service";
+import { SwapiServiceProvider } from '../swapi-service-context'
+import SwapiService from "../../services/swapi-service"
+import {PeoplePage, PlanetsPage, StarshipsPage, LoginPage, SecretPage, WelcomePage} from "../pages"
+
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import StarshipDetails from "../sw-components/starship-details";
 
 export default class App extends Component{
 
-  swapiService = new SwapiService();
+    state = {
+        selectedItem: null,
+        hasError: false,
+        swapiService: new SwapiService(),
+        isLoggedIn: false
+    }
 
-  state = {
-    selectedPerson: null,
-    hasError: false
-}
-componentDidCatch(error, errorInfo) {
-  this.setState({ hasError: true })
-}
+    onLogin = () => {
+        this.setState({
+            isLoggedIn: true
+        })
+    }
 
-render() {
-  if (this.state.hasError) {
-    return <ErrorIndicator />
-}
+    componentDidCatch(error, errorInfo) {
+        this.setState({ hasError: true })
+    }
 
-  return (
-    <ErrorBoundary>
-                <SwapiServiceProvider value={this.swapiService} >
-                    <div className="stardb-app">
-                        <Header/>
-                        <RandomPlanet />
+    render() {
 
-                        <PersonList />
-                        <PersonDetails itemId={2} />
+        if (this.state.hasError) {
+            return <ErrorIndicator />
+        }
 
-                        <StarshipList />
+        const { isLoggedIn, swapiService } = this.state
 
-                        <PlanetList/>
+        return (
+            <ErrorBoundary>
+                <SwapiServiceProvider value={swapiService} >
+                    <Router>
+                        <div className="stardb-app">
+                            <Header/>
+                            <RandomPlanet />
+                            <Switch>
+                                <Route path="/" component={WelcomePage} exact />
 
-                    </div>
+                                <Route path="/people/:id?" component={PeoplePage} exact/>
+
+                                <Route path="/planets/:id?" component={PlanetsPage} exact/>
+
+                                <Route path="/starships" component={StarshipsPage} exact/>
+                                <Route path="/starships/:id" render={({ match }) => {
+                                    const { id } = match.params
+                                    return <StarshipDetails itemId={id} />
+                                }}/>
+
+                                <Route path="/login" render={() => (
+                                    <LoginPage isLoggedIn={ isLoggedIn }
+                                               onLogin={() => this.onLogin()} />
+                                )} exact />
+
+                                <Route path="/secret" render={() => (
+                                    <SecretPage isLoggedIn={ isLoggedIn }/>
+                                )} exact />
+
+                                <Route component={NotFoundIndicator}/>
+                            </Switch>
+                        </div>
+                    </Router>
                 </SwapiServiceProvider>
-</ErrorBoundary>
-  )
-}
+            </ErrorBoundary>
+        )
+    }
 }

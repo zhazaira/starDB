@@ -1,32 +1,27 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
-import './header.css'
+import React from 'react';
 
-const Header = () => {
+import './header.css';
+
+const Header = ({onServiceChange}) => {
     return (
         <div className="header d-flex">
             <h3>
-                <Link to="/">StarDB</Link>
+                <a href="#">StarDB</a>
             </h3>
             <ul className="d-flex">
                 <li>
-                    <Link to="/people/">People</Link>
+                    <a href="#">People</a>
                 </li>
                 <li>
-                    <Link to="/planets/">Planets</Link>
+                    <a href="#">Planets</a>
                 </li>
                 <li>
-                    <Link to="/starships/">Starships</Link>
-                </li>
-                <li>
-                    <Link to="/login">Login</Link>
-                </li>
-                <li>
-                    <Link to="/secret">Secret</Link>
+                    <a href="#">Starships</a>
                 </li>
             </ul>
+            <button className="btn btn-primary btn-sm" onClick={onServiceChange}>Change Service</button>
         </div>
-    )
-}
+    );
+};
 
-export default Header
+export default Header;
